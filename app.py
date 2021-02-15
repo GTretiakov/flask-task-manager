@@ -139,6 +139,13 @@ def delete_task(task_id):
     return redirect(url_for('get_tasks'))
 
 
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    query = request.form.get('query')
+    tasks = list(mongo.db.tasks.find({'$text': {'$search': query}}))
+    return render_template('tasks.html', tasks=tasks)
+
+
 @app.route('/get_categories')
 def get_categories():
         categories = list(mongo.db.categories.find().sort('category_name', 1))
@@ -169,6 +176,13 @@ def edit_category(category_id):
         return redirect(url_for('get_categories'))
     category = mongo.db.categories.find_one({'_id': ObjectId(category_id)})
     return render_template('edit_category.html', category=category)
+
+
+@app.route('/delete_category/<category_id>')
+def delete_category(category_id):
+    mongo.db.categories.remove({ '_id': ObjectId(category_id)})
+    flash('Category Deleted')
+    return redirect(url_for('get_categories'))
 
 
 if  __name__ == "__main__":
